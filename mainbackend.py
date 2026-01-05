@@ -466,5 +466,6 @@ def update_profile():
     return jsonify({"message": "Profile updated", "student": student.to_dict()}), 200
 
 # ================= RUN =================
-if __name__ == "__main__":
-    app.run(host="0.0.0.0", debug=True)
+# if __name__ == "__main__":
+#     app.run(host="0.0.0.0", debug=True)
+
