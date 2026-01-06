@@ -156,6 +156,39 @@ def login_student():
 
     return jsonify({"message": "Login successful", "student": student.to_dict()}), 200
 
+@app.route("/TeacherSignup", methods=["POST"])
+def teacher_signup():
+    data = request.get_json()
+
+    required = ["name", "email", "schoolname", "password"]
+    if not all(k in data for k in required):
+        return jsonify({"error": "Missing fields"}), 400
+
+    if Teacher.query.filter_by(email=data["email"]).first():
+        return jsonify({"error": "Email already exists"}), 400
+
+    teacher = Teacher(
+        name=data["name"],
+        email=data["email"],
+        schoolname=data["schoolname"],
+        password=data["password"]
+    )
+
+    db.session.add(teacher)
+    db.session.commit()
+
+    return jsonify({"message": "Signup successful"}), 201
+
+@app.route("/TeacherLogin", methods=["POST"])
+def login_teacher():
+    data = request.get_json()
+
+    teacher = Teacher.query.filter_by(email=data.get("email")).first()
+    if not teacher or teacher.password != data.get("password"):
+        return jsonify({"error": "Invalid credentials"}), 401
+
+    return jsonify({"message": "Login successful", "teacher": teacher.to_dict()}), 200
+
 # ---------- LEADERBOARD ----------
 @app.route("/leaderboard", methods=["GET"])
 def leaderboard():
@@ -192,4 +225,5 @@ def assign_work():
 @app.route("/uploads/<filename>")
 def serve_file(filename):
     return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
+
 
