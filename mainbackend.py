@@ -145,6 +145,31 @@ def signup_student():
 
     return jsonify({"message": "Signup successful", "student": student.to_dict()}), 201
 
+@app.route("/teacher/dashboard", methods=["GET"])
+def teacher_dashboard():
+    teacher_email = request.args.get("email")
+
+    if not teacher_email:
+        return jsonify({"error": "Teacher email required"}), 400
+
+    teacher = Teacher.query.filter_by(email=teacher_email).first()
+    if not teacher:
+        return jsonify({"error": "Teacher not found"}), 404
+
+    # Students belonging to same school
+    students = Student.query.filter_by(
+        schoolname=teacher.schoolname
+    ).all()
+
+    total_students = len(students)
+
+    return jsonify({
+        "teacher": teacher.to_dict(),
+        "total_students": total_students,
+        "students": [s.to_dict() for s in students]
+    }), 200
+
+
 # ---------- STUDENT LOGIN ----------
 @app.route("/Login", methods=["POST"])
 def login_student():
@@ -259,6 +284,7 @@ def update_profile():
 @app.route("/uploads/<filename>")
 def serve_file(filename):
     return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
+
 
 
 
