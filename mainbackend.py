@@ -220,10 +220,50 @@ def assign_work():
     db.session.commit()
 
     return jsonify({"message": "Uploaded", "assignment": assignment.to_dict()}), 201
+@app.route("/assignments", methods=["GET"])
+def get_assignments():
+    works = Assignment.query.order_by(Assignment.timestamp.desc()).all()
+    return jsonify([w.to_dict() for w in works]), 200    
+@app.route("/leaderboard", methods=["GET"])
+def leaderboard():
+    students = Student.query.order_by(Student.score.desc()).all()
+    return jsonify([s.to_dict() for s in students]), 200
+
+
+@app.route("/scoreupdate", methods=["POST"])
+def update_score():
+    data = request.get_json()
+    student = Student.query.filter_by(name=data.get("name")).first()
+
+    if not student:
+        return jsonify({"error": "User not found"}), 404
+
+    student.score += int(data.get("score", 0))
+    db.session.commit()
+
+    return jsonify({"message": "Score updated", "student": student.to_dict()}), 200
+
+
+# ================= PROFILE UPDATE =================
+@app.route("/profilesupdate", methods=["POST"])
+def update_profile():
+    data = request.get_json()
+    student = Student.query.filter_by(name=data.get("name")).first()
+
+    if not student:
+        return jsonify({"error": "User not found"}), 404
+
+    for field in ["age", "schoolname", "classofstudy", "password"]:
+        if field in data:
+            setattr(student, field, data[field])
+
+    db.session.commit()
+    return jsonify({"message": "Profile updated", "student": student.to_dict()}), 200    
 
 # ---------- SERVE FILE ----------
 @app.route("/uploads/<filename>")
 def serve_file(filename):
     return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
+
 
 
