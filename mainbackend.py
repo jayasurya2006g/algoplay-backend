@@ -189,11 +189,6 @@ def login_teacher():
 
     return jsonify({"message": "Login successful", "teacher": teacher.to_dict()}), 200
 
-# ---------- LEADERBOARD ----------
-@app.route("/leaderboard", methods=["GET"])
-def leaderboard():
-    students = Student.query.order_by(Student.score.desc()).all()
-    return jsonify([s.to_dict() for s in students]), 200
 
 # ---------- FILE UPLOAD ----------
 @app.route("/assign_work", methods=["POST"])
@@ -264,6 +259,7 @@ def update_profile():
 @app.route("/uploads/<filename>")
 def serve_file(filename):
     return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
+
 
 
 
