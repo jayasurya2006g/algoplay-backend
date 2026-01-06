@@ -11,7 +11,17 @@ app = Flask(__name__)
 CORS(app)
 
 # ================= DATABASE CONFIG =================
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("DATABASE_URL")
+db_url = os.environ.get("DATABASE_URL")
+
+if db_url and db_url.startswith("postgresql://"):
+    db_url = db_url.replace(
+        "postgresql://",
+        "postgresql+psycopg://",
+        1
+    )
+
+app.config["SQLALCHEMY_DATABASE_URI"] = db_url
+
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db = SQLAlchemy(app)
@@ -182,3 +192,4 @@ def assign_work():
 @app.route("/uploads/<filename>")
 def serve_file(filename):
     return send_from_directory(app.config["UPLOAD_FOLDER"], filename)
+
